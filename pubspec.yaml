@@ -39,6 +39,8 @@ dependencies:
   vibration: any
   url_launcher: any
   audioplayers: any
+  lottie: ^2.7.0
+  glassmorphism: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +66,7 @@ flutter:
   assets:
     - assets/images/
     - assets/sounds/
+    - assets/animations/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

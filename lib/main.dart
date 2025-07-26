@@ -119,10 +119,14 @@ class _ExamplePageState extends State<Example> {
 }
 */
 // main.dart
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:swipeimages/swipe_card.dart';
-
+import 'dart:async';
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 void main() {
   runApp(const MyApp());
@@ -148,8 +152,108 @@ class _MyAppState extends State<MyApp> {
       title: 'Tinder Flutter App',
       debugShowCheckedModeBanner: false,
       theme: isDarkMode ? ThemeData.dark() : ThemeData.light(),
-      home: SwipeCardExample(toggleTheme: toggleTheme, isDarkMode: isDarkMode),
+      home: DatingSplashScreen(toggleTheme: toggleTheme, isDarkMode: isDarkMode),
     );
   }
 }
+
+
+
+class DatingSplashScreen extends StatefulWidget {
+  final Function(bool) toggleTheme;
+  final bool isDarkMode;
+
+  const DatingSplashScreen({
+    Key? key,
+    required this.toggleTheme,
+    required this.isDarkMode,
+  }) : super(key: key);
+
+  @override
+  _DatingSplashScreenState createState() => _DatingSplashScreenState();
+}
+
+class _DatingSplashScreenState extends State<DatingSplashScreen> {
+  late final AudioPlayer _audioPlayer;
+  bool isDarkMode = false;
+
+  void toggleTheme(bool value) {
+    setState(() => isDarkMode = value);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer = AudioPlayer();
+    _playKissSound(); // play on load
+
+    Timer(Duration(seconds: 8), () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SwipeCardExample(
+            toggleTheme: toggleTheme,
+            isDarkMode: isDarkMode,
+          ),
+        ),
+      );
+    });
+  }
+
+  Future<void> _playKissSound() async {
+    await _audioPlayer.play(AssetSource('sounds/kiss.mp3'));
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
+            child: Container(color: Colors.purpleAccent.shade200),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 60.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Lottie.asset(
+                        'assets/animations/Mouth.json',
+                        repeat: true,
+                      ),
+                      Text(
+                        'Swipe. Connect. Repeat.',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          letterSpacing: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 

@@ -1,7 +1,10 @@
-// Enhanced Swipe Card UI with Glass Blur & Animations
+// Enhanced Swipe Card UI with Glass Blur, Animations & Navigation Drawer
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:scrumlab_flutter_tindercard/scrumlab_flutter_tindercard.dart';
+import 'package:swipeimages/coins_screen.dart';
+import 'package:swipeimages/like_profile_screen.dart';
+import 'package:swipeimages/user_profile_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vibration/vibration.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -56,7 +59,6 @@ class _SwipeCardExampleState extends State<SwipeCardExample> with SingleTickerPr
   int currentIndex = 0;
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
-  late Animation<double> _moodAnimation;
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   final List<Profile> masterList = [
@@ -76,14 +78,8 @@ class _SwipeCardExampleState extends State<SwipeCardExample> with SingleTickerPr
     super.initState();
     controller = CardController();
     loadProfiles();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _fadeInAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeIn,
-    );
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
+    _fadeInAnimation = CurvedAnimation(parent: _animationController, curve: Curves.easeIn);
     _animationController.forward();
     playMoodSound();
   }
@@ -112,8 +108,6 @@ class _SwipeCardExampleState extends State<SwipeCardExample> with SingleTickerPr
     final Uri url = Uri(scheme: 'tel', path: phoneNumber);
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
-    } else {
-      print('Could not launch $url');
     }
   }
 
@@ -121,8 +115,6 @@ class _SwipeCardExampleState extends State<SwipeCardExample> with SingleTickerPr
     final Uri url = Uri.parse('https://meet.google.com/new');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
-      print('Could not launch $url');
     }
   }
 
@@ -135,10 +127,7 @@ class _SwipeCardExampleState extends State<SwipeCardExample> with SingleTickerPr
           border: Border.all(color: color, width: 3),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Text(
-          text,
-          style: TextStyle(color: color, fontSize: 28, fontWeight: FontWeight.bold),
-        ),
+        child: Text(text, style: TextStyle(color: color, fontSize: 28, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -168,13 +157,119 @@ class _SwipeCardExampleState extends State<SwipeCardExample> with SingleTickerPr
       backgroundColor: isDarkMode ? Colors.black : Colors.pink.shade50,
       appBar: AppBar(
         backgroundColor: isDarkMode ? Colors.grey[900] : Colors.pink.shade50,
-        title: const Text('💕 Discover Love'),
-        actions: [
-          IconButton(
-            icon: Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
-            onPressed: () => widget.toggleTheme(!isDarkMode),
-          ),
-        ],
+        automaticallyImplyLeading: true, // disables default drawer icon
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // 🔥 Coin + Add Icon
+            GestureDetector(
+              onTap: () {
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CoinStoreScreen(),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade400, // or use a darker shade if in dark mode
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.monetization_on, color: Colors.amber, size: 20),
+                    const SizedBox(width: 4),
+                    Text(
+                      "10",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Colors.black,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.pink.shade100,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.add, size: 14, color: Colors.pink),
+                    ),
+                  ],
+                ),
+              )
+
+            ),
+
+            // ❤️ Title in Center (Optional)
+            const Text('❤️ Discover Love'),
+
+            // 🌙 Theme Toggle
+            IconButton(
+              icon: Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
+              onPressed: () => widget.toggleTheme(!isDarkMode),
+            ),
+          ],
+        ),
+      ),
+
+
+      drawer: Drawer(
+        backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: isDarkMode ? Colors.grey[800] : Colors.pinkAccent),
+              child: const Text('Hello, Aksh 👋', style: TextStyle(color: Colors.white, fontSize: 24)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Profile'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UserProfileScreen(profile: profiles[currentIndex]),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.favorite),
+              title: const Text('Liked Profiles'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LikedProfilesScreen(
+                      likedProfiles: likedProfiles, // 👈 Pass your actual liked profiles list here
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () => Navigator.pop(context),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
       ),
       body: FadeTransition(
         opacity: _fadeInAnimation,
@@ -218,9 +313,7 @@ class _SwipeCardExampleState extends State<SwipeCardExample> with SingleTickerPr
                                             filter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
                                             child: Container(
                                               padding: const EdgeInsets.all(20),
-                                              decoration: BoxDecoration(
-                                                color: Colors.black.withOpacity(0.4),
-                                              ),
+                                              decoration: BoxDecoration(color: Colors.black.withOpacity(0.4)),
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
